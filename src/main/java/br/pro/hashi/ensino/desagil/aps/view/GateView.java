@@ -12,14 +12,16 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URL;
 
-public class GateView extends FixedPanel implements ActionListener, MouseListener {
+class GateView extends FixedPanel implements ActionListener, MouseListener {
     private final Gate gate;
 
     private final JCheckBox input1;
     private final JCheckBox input2;
+    private final JCheckBox input3;
     private final Image image;
     private final Switch switch1;
     private final Switch switch2;
+    private final Switch switch3;
     private final Light output;
     // Novos atributos necessários para esta versão da interface.
     private Color color;
@@ -34,8 +36,10 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
 
         input1 = new JCheckBox();
         input2 = new JCheckBox();
+        input3 = new JCheckBox();
         switch1 = new Switch();
         switch2 = new Switch();
+        switch3 = new Switch();
         output = new Light(255, 0, 0);
         JLabel img_credit = new JLabel("Images by Wikipedia");
 
@@ -45,11 +49,18 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
 
         // Como subclasse de FixedPanel, agora podemos definir a
         // posição e o tamanho de cada componente ao adicioná-la.
-        if (this.gate.getInputSize() > 1) {
-            add(input1, 12, 10, 25, 25);
-            add(input2, 12, 45, 25, 25);
-        } else {
-            add(input1, 12, 27, 25, 25);
+        if (this.gate.getInputSize() == 3) {
+            add(input1, 200, 7, 25, 25);
+            add(input2, 200, 28, 25, 25);
+            add(input3, 200, 50, 25, 25);
+
+        }
+        if (this.gate.getInputSize() == 2) {
+            add(input1, 200, 18, 25, 25);
+            add(input2, 200, 38, 25, 25);
+        }
+        if (this.gate.getInputSize() == 1) {
+            add(input1, 200, 28, 25, 25);
         }
         add(img_credit, 30, 85, 170, 15);
 
@@ -63,6 +74,7 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
 
         input1.addActionListener(this);
         input2.addActionListener(this);
+        input3.addActionListener(this);
         // Toda componente Swing tem uma lista de observadores
         // que reagem quando algum evento de mouse acontece.
         // Usamos o método addMouseListener para adicionar a
@@ -77,6 +89,26 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
 
     private void update() {
         output.connect(0, this.gate);
+        if (this.gate.getInputSize() == 3) {
+            if (input1.isSelected()) {
+                switch1.turnOn();
+            } else {
+                switch1.turnOff();
+            }
+            if (input2.isSelected()) {
+                switch2.turnOn();
+            } else {
+                switch2.turnOff();
+            }
+            if (input3.isSelected()) {
+                switch3.turnOn();
+            } else {
+                switch3.turnOff();
+            }
+            this.gate.connect(0, switch1);
+            this.gate.connect(1, switch2);
+            this.gate.connect(2, switch3);
+        }
         if (this.gate.getInputSize() == 2) {
             if (input1.isSelected()) {
                 switch1.turnOn();
@@ -113,9 +145,14 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
         // Descobre em qual posição o clique ocorreu.
         int x = event.getX();
         int y = event.getY();
+        System.out.println(x + " " + y);
+
+        int x0 = 15;
+        int y0 = 39;
+        int r = 13;
 
         // Se o clique foi dentro do quadrado colorido...
-        if (x >= 185 && x < 200 && y >= 32 && y < 47) {
+        if (Math.sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0)) < r) {
 
             // ...então abrimos a janela seletora de cor...
             color = JColorChooser.showDialog(this, null, color);
@@ -167,7 +204,7 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
 
         // Desenha um quadrado cheio.
         g.setColor(output.getColor());
-        g.fillOval(180, 27, 25, 25);
+        g.fillOval(3, 27, 25, 25);
     }
 
 }
